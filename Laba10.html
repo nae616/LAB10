@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lab 10</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="game-title">Слот-машина</div>
+        <input type="text" id="name-input" placeholder="Введіть ваше ім'я" />
+        <div id="attempt-info">Спроба 1 з 3</div>
+        <button id="generate-btn">Генерувати</button>
+        <div id="slot-machine">
+            <div class="column" id="col-1"></div>
+            <div class="column" id="col-2"></div>
+            <div class="column" id="col-3"></div>
+        </div>
+    </div>
+
+    <script>
+        const images = [
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMXmK_0HyIUUe3rPFiAvSJnWvYtpP5b778Bw&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCNE1esQiSSK6OgKH5aq3moPOr58hiaRy-Ww&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTMAvgwR5zkFsUG3Jp7V0hI8lJwWgW4AUPRg&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHx3Mn2SQgBtZAbYEDh2hq7H1ksXUTi0Uj6g&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpMqaUDGM1n8h8zJbrgpW7Ti7U8dI4-Df8gg&s'
+        ];
+
+        let attempts = 0;
+        let userName = '';
+
+        function spinColumn(column) {
+            const totalImages = images.length;
+            column.innerHTML = '';
+            
+
+           
+            for (let i = 0; i < 5; i++) {
+                const img = document.createElement('img');
+                img.src = images[Math.floor(Math.random() * totalImages)];
+                column.appendChild(img);
+            }
+
+           
+            column.style.transition = 'transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+            column.style.transform = 'rotateX(720deg)'; 
+
+            setTimeout(() => {
+                column.style.transition = 'none';
+                column.style.transform = 'rotateX(0)'; 
+                column.innerHTML = ''; 
+
+                
+                for (let i = 0; i < 3; i++) {
+                    const img = document.createElement('img');
+                    img.src = images[Math.floor(Math.random() * totalImages)];
+                    column.appendChild(img);
+                }
+            }, 1000); 
+        }
+
+        function generateImages() {
+            const nameInput = document.getElementById('name-input');
+            userName = nameInput.value.trim(); 
+
+            if (!userName) {
+                alert("Будь ласка, введіть своє ім'я.");
+                return; 
+            }
+
+            attempts++;
+            document.getElementById('attempt-info').innerText = `Спроба ${attempts} з 3`;
+            if (attempts > 3) {
+                alert(`${userName}, гра завершена. Ви програли!`);
+                resetGame();
+                return;
+            }
+
+            const columns = [
+                document.getElementById('col-1'),
+                document.getElementById('col-2'),
+                document.getElementById('col-3')
+            ];
+
+            columns.forEach((column, index) => {
+                column.style.visibility = 'visible';
+                setTimeout(() => spinColumn(column), index * 300); 
+            });
+
+            setTimeout(checkWin, 1500); 
+        }
+
+        function checkWin() {
+            const middleImages = [
+                document.getElementById('col-1').children[1]?.src,
+                document.getElementById('col-2').children[1]?.src,
+                document.getElementById('col-3').children[1]?.src
+            ];
+
+            const win = middleImages.every(src => src && src === middleImages[0]);
+
+            if (win) {
+                alert(`Вітаємо, ${userName}! Ви виграли!`);
+                resetGame();
+            } else if (attempts === 3) {
+                alert(`Спроби закінчились, ${userName}. Ви програли!`);
+                resetGame();
+            }
+        }
+
+        function resetGame() {
+            attempts = 0;
+            document.getElementById('attempt-info').innerText = "Спроба 1 з 3";
+            const columns = [1, 2, 3].map(col => document.getElementById(`col-${col}`));
+            columns.forEach(col => {
+                col.innerHTML = '';
+                col.style.visibility = 'hidden';
+            });
+        }
+
+        document.getElementById('generate-btn').addEventListener('click', generateImages);
+    </script>
+</body>
+</html>
